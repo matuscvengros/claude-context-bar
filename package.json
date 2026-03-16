@@ -6,7 +6,7 @@
     "claude-context-window": "bin/cli.js"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/statusline.test.js test/cli.test.js"
   },
   "license": "MIT",
   "engines": {
