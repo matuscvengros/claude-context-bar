@@ -1,9 +1,9 @@
 {
-  "name": "claude-context-bar",
+  "name": "claude-context-window",
   "version": "0.0.1",
   "description": "Real-time context window usage bar for Claude Code",
   "bin": {
-    "claude-context-bar": "./bin/cli.js"
+    "claude-context-window": "./bin/cli.js"
   },
   "scripts": {
     "test": "node --test test/*.test.js"

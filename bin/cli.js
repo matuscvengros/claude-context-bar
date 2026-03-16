@@ -6,8 +6,8 @@ const path = require('path');
 const os = require('os');
 const readline = require('readline');
 
-const SCRIPT_NAME = 'claude-context-bar.js';
-const MARKER = 'claude-context-bar';
+const SCRIPT_NAME = 'claude-context-window.js';
+const MARKER = 'claude-context-window';
 
 const COLOR = {
   green: '\x1b[32m',
@@ -92,7 +92,7 @@ async function install() {
 
   writeSettings(settingsPath, settings);
 
-  console.log(`\n${COLOR.green}\u2713 claude-context-bar installed${COLOR.reset}`);
+  console.log(`\n${COLOR.green}\u2713 claude-context-window installed${COLOR.reset}`);
   console.log(`  Script: ${scriptDest}`);
   console.log(`  Config: ${settingsPath}`);
   console.log(`\n${COLOR.dim}Restart Claude Code to activate.${COLOR.reset}\n`);
@@ -124,7 +124,7 @@ function uninstall() {
     return;
   }
 
-  console.log(`\n${COLOR.green}\u2713 claude-context-bar uninstalled${COLOR.reset}`);
+  console.log(`\n${COLOR.green}\u2713 claude-context-window uninstalled${COLOR.reset}`);
   if (removedScript) console.log(`  Removed: ${scriptDest}`);
   if (removedConfig) console.log(`  Cleaned: ${settingsPath}`);
   console.log(`\n${COLOR.dim}Restart Claude Code to deactivate.${COLOR.reset}\n`);
@@ -132,11 +132,11 @@ function uninstall() {
 
 function printUsage() {
   console.log(`
-${COLOR.green}claude-context-bar${COLOR.reset} — Real-time context window usage bar for Claude Code
+${COLOR.green}claude-context-window${COLOR.reset} — Real-time context window usage bar for Claude Code
 
 Usage:
-  npx claude-context-bar@latest ${COLOR.dim}install${COLOR.reset}     Install and configure
-  npx claude-context-bar@latest ${COLOR.dim}uninstall${COLOR.reset}   Remove and clean up
+  npx claude-context-window@latest ${COLOR.dim}install${COLOR.reset}     Install and configure
+  npx claude-context-window@latest ${COLOR.dim}uninstall${COLOR.reset}   Remove and clean up
 `);
 }
 

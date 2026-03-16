@@ -1,9 +1,9 @@
 # Claude: Context Bar
 
-[![CI](https://github.com/matuscvengros/claude-context-bar/actions/workflows/ci.yml/badge.svg)](https://github.com/matuscvengros/claude-context-bar/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/claude-context-bar)](https://www.npmjs.com/package/claude-context-bar)
-[![Downloads](https://img.shields.io/npm/dm/claude-context-bar)](https://www.npmjs.com/package/claude-context-bar)
-[![License](https://img.shields.io/npm/l/claude-context-bar)](https://github.com/matuscvengros/claude-context-bar/blob/main/LICENSE)
+[![CI](https://github.com/matuscvengros/claude-context-window/actions/workflows/ci.yml/badge.svg)](https://github.com/matuscvengros/claude-context-window/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/claude-context-window)](https://www.npmjs.com/package/claude-context-window)
+[![Downloads](https://img.shields.io/npm/dm/claude-context-window)](https://www.npmjs.com/package/claude-context-window)
+[![License](https://img.shields.io/npm/l/claude-context-window)](https://github.com/matuscvengros/claude-context-window/blob/main/LICENSE)
 
 Real-time context window usage bar for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
@@ -19,7 +19,7 @@ Opus 4.6 │ █████████░ 90% │ 900K/1M tokens     ← red
 ## Install
 
 ```sh
-npx claude-context-bar@latest install
+npx claude-context-window@latest install
 ```
 
 Restart Claude Code to activate.
@@ -27,12 +27,12 @@ Restart Claude Code to activate.
 ## Uninstall
 
 ```sh
-npx claude-context-bar@latest uninstall
+npx claude-context-window@latest uninstall
 ```
 
 ## How it works
 
-The installer copies a lightweight Node.js script to `~/.claude/claude-context-bar.js` and configures the `statusLine` setting in `~/.claude/settings.json`. Claude Code periodically invokes the script, passing context window metrics via stdin. The script outputs a formatted, color-coded status line.
+The installer copies a lightweight Node.js script to `~/.claude/claude-context-window.js` and configures the `statusLine` setting in `~/.claude/settings.json`. Claude Code periodically invokes the script, passing context window metrics via stdin. The script outputs a formatted, color-coded status line.
 
 **Colors indicate context usage:**
 

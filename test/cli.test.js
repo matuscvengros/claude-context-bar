@@ -34,7 +34,7 @@ describe('CLI', () => {
   beforeEach(() => {
     tmpHome = createTempHome();
     claudeDir = path.join(tmpHome, '.claude');
-    scriptPath = path.join(claudeDir, 'claude-context-bar.js');
+    scriptPath = path.join(claudeDir, 'claude-context-window.js');
     settingsPath = path.join(claudeDir, 'settings.json');
   });
 
@@ -49,7 +49,7 @@ describe('CLI', () => {
       assert.ok(fs.existsSync(settingsPath), 'settings should exist');
       const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
       assert.equal(settings.statusLine.type, 'command');
-      assert.ok(settings.statusLine.command.includes('claude-context-bar'));
+      assert.ok(settings.statusLine.command.includes('claude-context-window'));
       assert.ok(stdout.includes('installed'));
     });
 
@@ -68,13 +68,13 @@ describe('CLI', () => {
     it('overwrites own previous installation', () => {
       fs.mkdirSync(claudeDir, { recursive: true });
       fs.writeFileSync(settingsPath, JSON.stringify({
-        statusLine: { type: 'command', command: 'node /old/claude-context-bar.js' },
+        statusLine: { type: 'command', command: 'node /old/claude-context-window.js' },
       }));
 
       runCli(['install'], { HOME: tmpHome });
 
       const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-      assert.ok(settings.statusLine.command.includes('claude-context-bar'));
+      assert.ok(settings.statusLine.command.includes('claude-context-window'));
     });
 
     it('copies a working statusline script', () => {
@@ -117,7 +117,7 @@ describe('CLI', () => {
       fs.mkdirSync(claudeDir, { recursive: true });
       fs.writeFileSync(settingsPath, JSON.stringify({
         theme: 'dark',
-        statusLine: { type: 'command', command: 'node /path/claude-context-bar.js' },
+        statusLine: { type: 'command', command: 'node /path/claude-context-window.js' },
       }));
 
       runCli(['uninstall'], { HOME: tmpHome });
