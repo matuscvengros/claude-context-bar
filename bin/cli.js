@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const readline = require('readline');
+
+const SCRIPT_NAME = 'claude-context-bar.js';
+const MARKER = 'claude-context-bar';
+
+const COLOR = {
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+  dim: '\x1b[2m',
+  reset: '\x1b[0m',
+};
+
+function getClaudeDir() {
+  return path.join(os.homedir(), '.claude');
+}
+
+function getScriptDest() {
+  return path.join(getClaudeDir(), SCRIPT_NAME);
+}
+
+function getSettingsPath() {
+  return path.join(getClaudeDir(), 'settings.json');
+}
+
+function buildCommand(scriptPath) {
+  const normalized = scriptPath.replace(/\\/g, '/');
+  return `node ${normalized}`;
+}
+
+function readSettings(settingsPath) {
+  try {
+    const raw = fs.readFileSync(settingsPath, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+function writeSettings(settingsPath, settings) {
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf8');
+}
+
+function isOurs(settings) {
+  return settings.statusLine
+    && settings.statusLine.command
+    && settings.statusLine.command.includes(MARKER);
+}
+
+function askOverwrite() {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(`${COLOR.yellow}A statusLine is already configured. Overwrite? (y/N) ${COLOR.reset}`, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'y');
+    });
+  });
+}
+
+async function install() {
+  const claudeDir = getClaudeDir();
+  const scriptDest = getScriptDest();
+  const settingsPath = getSettingsPath();
+
+  if (!fs.existsSync(claudeDir)) {
+    fs.mkdirSync(claudeDir, { recursive: true });
+  }
+
+  const scriptSrc = path.join(__dirname, '..', 'src', 'statusline.js');
+  fs.copyFileSync(scriptSrc, scriptDest);
+
+  const settings = readSettings(settingsPath);
+
+  if (settings.statusLine && !isOurs(settings)) {
+    const overwrite = await askOverwrite();
+    if (!overwrite) {
+      console.log(`${COLOR.dim}Installation cancelled.${COLOR.reset}`);
+      process.exit(0);
+    }
+  }
+
+  settings.statusLine = {
+    type: 'command',
+    command: buildCommand(scriptDest),
+  };
+
+  writeSettings(settingsPath, settings);
+
+  console.log(`\n${COLOR.green}\u2713 claude-context-bar installed${COLOR.reset}`);
+  console.log(`  Script: ${scriptDest}`);
+  console.log(`  Config: ${settingsPath}`);
+  console.log(`\n${COLOR.dim}Restart Claude Code to activate.${COLOR.reset}\n`);
+}
+
+function uninstall() {
+  const scriptDest = getScriptDest();
+  const settingsPath = getSettingsPath();
+
+  let removedScript = false;
+  let removedConfig = false;
+
+  if (fs.existsSync(scriptDest)) {
+    fs.unlinkSync(scriptDest);
+    removedScript = true;
+  }
+
+  if (fs.existsSync(settingsPath)) {
+    const settings = readSettings(settingsPath);
+    if (isOurs(settings)) {
+      delete settings.statusLine;
+      writeSettings(settingsPath, settings);
+      removedConfig = true;
+    }
+  }
+
+  if (!removedScript && !removedConfig) {
+    console.log(`${COLOR.dim}Nothing to uninstall.${COLOR.reset}`);
+    return;
+  }
+
+  console.log(`\n${COLOR.green}\u2713 claude-context-bar uninstalled${COLOR.reset}`);
+  if (removedScript) console.log(`  Removed: ${scriptDest}`);
+  if (removedConfig) console.log(`  Cleaned: ${settingsPath}`);
+  console.log(`\n${COLOR.dim}Restart Claude Code to deactivate.${COLOR.reset}\n`);
+}
+
+function printUsage() {
+  console.log(`
+${COLOR.green}claude-context-bar${COLOR.reset} — Real-time context window usage bar for Claude Code
+
+Usage:
+  npx claude-context-bar@latest ${COLOR.dim}install${COLOR.reset}     Install and configure
+  npx claude-context-bar@latest ${COLOR.dim}uninstall${COLOR.reset}   Remove and clean up
+`);
+}
+
+const command = process.argv[2];
+
+switch (command) {
+  case 'install':
+    install().catch((err) => {
+      console.error(`${COLOR.red}Install failed: ${err.message}${COLOR.reset}`);
+      process.exit(1);
+    });
+    break;
+  case 'uninstall':
+    uninstall();
+    break;
+  default:
+    printUsage();
+    break;
+}

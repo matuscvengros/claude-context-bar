@@ -1,0 +1,8 @@
+# User
+.claude
+.docs
+
+node_modules/
+coverage/
+.DS_Store
+*.tgz
