@@ -89,12 +89,6 @@ async function install() {
   const scriptSrc = path.join(__dirname, '..', 'src', 'statusline.js');
   fs.copyFileSync(scriptSrc, scriptDest);
 
-  // Remove legacy script from pre-0.2.0 installs (was in ~/.claude/ instead of ~/.claude/hooks/)
-  const legacyScript = path.join(getClaudeDir(), SCRIPT_NAME);
-  if (fs.existsSync(legacyScript)) {
-    fs.unlinkSync(legacyScript);
-  }
-
   settings.statusLine = {
     type: 'command',
     command: buildCommand(scriptDest),
@@ -130,13 +124,6 @@ function uninstall() {
 
   if (fs.existsSync(scriptDest)) {
     fs.unlinkSync(scriptDest);
-    removedScript = true;
-  }
-
-  // Remove legacy script from pre-0.2.0 installs (was in ~/.claude/ instead of ~/.claude/hooks/)
-  const legacyScript = path.join(claudeDir, SCRIPT_NAME);
-  if (fs.existsSync(legacyScript)) {
-    fs.unlinkSync(legacyScript);
     removedScript = true;
   }
 
