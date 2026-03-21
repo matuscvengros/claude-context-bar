@@ -18,7 +18,7 @@ Opus 4.6 │ 900K/1M tokens │ █████████░ 90%     ← red
 
 ## Installation
 
-There are four ways to install, depending on your setup. Restart Claude Code after installing.
+There are three ways to install, depending on your setup. Restart Claude Code after installing.
 
 ### Option 1: npx (standalone)
 
@@ -57,26 +57,14 @@ This points the status line directly at the plugin's cached copy of the script �
 /claude-context-window:uninstall
 ```
 
-### Option 3: Claude Code plugin (from a marketplace)
-
-This plugin is also available through plugin marketplaces that include it (e.g. [claude-mako-plugins](https://github.com/matuscvengros/claude-mako-plugins)). If your marketplace already has it, just install and activate:
-
-```sh
-claude plugin install claude-context-window@<marketplace-name>
-```
-
-```
-/claude-context-window:install
-```
-
-### Option 4: Shell script (Docker / CI)
+### Option 3: Shell script (Docker / CI)
 
 For headless environments where there is no interactive Claude Code session. Requires `node` and `jq`.
 
 ```sh
-./install.sh              # install
-./install.sh uninstall    # remove
-./install.sh --force      # overwrite existing statusLine from another tool
+./install.sh
+./install.sh --force   # overwrite existing statusLine from another tool
+./uninstall.sh
 ```
 
 Copies the script to `~/.claude/statusline.js` and configures `~/.claude/settings.json`. The script resolves its own location, so it works from any working directory — just call it by its path.

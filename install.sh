@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # install.sh — Configure claude-context-window status bar in Claude Code settings.
-# Usage: ./install.sh [install|uninstall|--force]
+# Usage: ./install.sh [--force]
 #
 # Copies src/statusline.js to ~/.claude/statusline.js and updates
 # ~/.claude/settings.json with the statusLine command.
@@ -47,7 +47,7 @@ build_command() {
   echo "node \"${normalized}\" # claude-context-window"
 }
 
-do_install() {
+install() {
   ensure_deps
 
   if [ ! -f "$STATUSLINE_SRC" ]; then
@@ -55,28 +55,25 @@ do_install() {
     exit 1
   fi
 
-  # Ensure ~/.claude/ exists
   mkdir -p "$CLAUDE_DIR"
-
-  # Copy statusline.js to ~/.claude/statusline.js
   cp "$STATUSLINE_SRC" "$STATUSLINE_DEST"
 
   local settings
   settings="$(read_settings)"
 
-  # Check for existing non-ours statusLine
-  local existing_cmd
-  existing_cmd="$(echo "$settings" | jq -r '.statusLine.command // ""')"
-  if [ -n "$existing_cmd" ] && ! echo "$existing_cmd" | grep -q "$MARKER"; then
-    echo "Warning: a statusLine is already configured by another tool." >&2
-    echo "Existing command: ${existing_cmd}" >&2
-    echo "Use --force to overwrite, or remove it manually from ${SETTINGS_FILE}" >&2
-    # Clean up copied file
-    rm -f "$STATUSLINE_DEST"
-    exit 1
+  # Check for existing non-ours statusLine (skip with --force)
+  if [ "${1:-}" != "--force" ]; then
+    local existing_cmd
+    existing_cmd="$(echo "$settings" | jq -r '.statusLine.command // ""')"
+    if [ -n "$existing_cmd" ] && ! echo "$existing_cmd" | grep -q "$MARKER"; then
+      echo "Warning: a statusLine is already configured by another tool." >&2
+      echo "Existing command: ${existing_cmd}" >&2
+      echo "Use --force to overwrite, or remove it manually from ${SETTINGS_FILE}" >&2
+      rm -f "$STATUSLINE_DEST"
+      exit 1
+    fi
   fi
 
-  # Update settings.json
   local cmd
   cmd="$(build_command "$STATUSLINE_DEST")"
   local new_settings
@@ -92,77 +89,16 @@ do_install() {
   printf "\n${DIM}Restart Claude Code to activate.${RESET}\n\n"
 }
 
-do_force_install() {
-  ensure_deps
-
-  if [ ! -f "$STATUSLINE_SRC" ]; then
-    echo "Error: statusline.js not found at ${STATUSLINE_SRC}" >&2
-    exit 1
-  fi
-
-  mkdir -p "$CLAUDE_DIR"
-  cp "$STATUSLINE_SRC" "$STATUSLINE_DEST"
-
-  local settings
-  settings="$(read_settings)"
-  local cmd
-  cmd="$(build_command "$STATUSLINE_DEST")"
-  local new_settings
-  new_settings="$(echo "$settings" | jq \
-    --arg cmd "$cmd" \
-    '.statusLine = {"type": "command", "command": $cmd, "padding": 0}')"
-
-  echo "$new_settings" > "$SETTINGS_FILE"
-
-  printf "\n${GREEN}✓ claude-context-window installed (forced)${RESET}\n"
-  printf "  Script: %s\n" "$STATUSLINE_DEST"
-  printf "  Config: %s\n" "$SETTINGS_FILE"
-  printf "\n${DIM}Restart Claude Code to activate.${RESET}\n\n"
-}
-
-uninstall() {
-  ensure_deps
-
-  local removed_script=false
-  local removed_config=false
-
-  if [ -f "$STATUSLINE_DEST" ]; then
-    rm -f "$STATUSLINE_DEST"
-    removed_script=true
-  fi
-
-  if [ -f "$SETTINGS_FILE" ]; then
-    local settings
-    settings="$(read_settings)"
-
-    local existing_cmd
-    existing_cmd="$(echo "$settings" | jq -r '.statusLine.command // ""')"
-
-    if echo "$existing_cmd" | grep -q "$MARKER"; then
-      local new_settings
-      new_settings="$(echo "$settings" | jq 'del(.statusLine)')"
-      echo "$new_settings" > "$SETTINGS_FILE"
-      removed_config=true
-    fi
-  fi
-
-  if [ "$removed_script" = false ] && [ "$removed_config" = false ]; then
-    printf "${DIM}Nothing to uninstall.${RESET}\n"
-    return
-  fi
-
-  printf "\n${GREEN}✓ claude-context-window uninstalled${RESET}\n"
-  [ "$removed_script" = true ] && printf "  Removed: %s\n" "$STATUSLINE_DEST"
-  [ "$removed_config" = true ] && printf "  Cleaned: %s\n" "$SETTINGS_FILE"
-  printf "\n${DIM}Restart Claude Code to deactivate.${RESET}\n\n"
-}
-
-case "${1:-install}" in
-  install)             do_install ;;
-  --uninstall|uninstall) uninstall ;;
-  --force)             do_force_install ;;
+case "${1:---help}" in
+  install)   install ;;
+  --force)   install "--force" ;;
+  --help|-h)
+    echo "Usage: $0 [install|--force]"
+    echo "  install    Copy statusline.js and configure settings.json"
+    echo "  --force    Overwrite existing statusLine from another tool"
+    ;;
   *)
-    echo "Usage: $0 [install|uninstall|--force]"
+    echo "Usage: $0 [install|--force]" >&2
     exit 1
     ;;
 esac
