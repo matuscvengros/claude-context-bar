@@ -424,6 +424,31 @@ describe('renderLine2', () => {
     assert.ok(output.includes('[Opus 4.6]'));
     assert.ok(!output.includes('('));
   });
+
+  it('derives token count from unrounded percentage (1M context)', () => {
+    // 45.7% of 1M = 457000, which formats to 457K. If tokens were derived
+    // from the rounded percentage (46), we'd see 460K instead — that's the
+    // 10k-step quantisation we want to avoid on the 1M model.
+    const data = {
+      context_window: { used_percentage: 45.7, context_window_size: 1000000 },
+      model: { display_name: 'Opus 4.7' },
+    };
+    const output = renderLine2(data);
+    assert.ok(output.includes('[457K/1M]'), `expected 457K, got: ${output}`);
+    assert.ok(output.includes('[46%]'));
+  });
+
+  it('rounds percentage label but keeps fine token resolution', () => {
+    // 45.4% rounds down to 45 for the label, but tokens should reflect the
+    // raw value: 0.454 * 1_000_000 = 454000 → 454K.
+    const data = {
+      context_window: { used_percentage: 45.4, context_window_size: 1000000 },
+      model: { display_name: 'Opus 4.7' },
+    };
+    const output = renderLine2(data);
+    assert.ok(output.includes('[454K/1M]'), `expected 454K, got: ${output}`);
+    assert.ok(output.includes('[45%]'));
+  });
 });
 
 describe('renderLine1', () => {

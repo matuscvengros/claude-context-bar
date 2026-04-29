@@ -172,22 +172,23 @@ function renderLine1(data) {
 
 function renderLine2(data) {
   const ctx = data && data.context_window;
-  const usedPct = ctx && typeof ctx.used_percentage === 'number' ? Math.round(ctx.used_percentage) : null;
+  const usedPctRaw = ctx && typeof ctx.used_percentage === 'number' ? ctx.used_percentage : null;
   const modelName = (data && data.model && data.model.display_name) || 'Claude';
   const effort = (data && data.effort) || (data && data.model && data.model.effort) || '';
   const modelLabel = effort ? `${modelName} (${effort})` : modelName;
 
-  if (usedPct === null) {
+  if (usedPctRaw === null) {
     const bar = EMPTY.repeat(BAR_WIDTH);
     return `${COLOR.dim}[${modelLabel}] [waiting...] ${bar} [0%]${COLOR.reset}`;
   }
 
-  const clamped = Math.max(0, Math.min(100, usedPct));
+  const clampedRaw = Math.max(0, Math.min(100, usedPctRaw));
+  const clamped = Math.round(clampedRaw);
   const color = getColor(clamped);
   const bar = buildBar(clamped);
 
   const ctxSize = (ctx && ctx.context_window_size) || 200000;
-  const usedTokens = Math.round(ctxSize * clamped / 100);
+  const usedTokens = Math.round(ctxSize * clampedRaw / 100);
 
   return `${color}[${modelLabel}] [${formatTokens(usedTokens)}/${formatTokens(ctxSize)}] ${bar} [${clamped}%]${COLOR.reset}`;
 }
