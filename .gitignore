@@ -5,6 +5,8 @@ docs
 
 # Claude
 settings.local.json
+CLAUDE.md
+AGENTS.md
 
 node_modules/
 coverage/
